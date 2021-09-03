@@ -49,7 +49,7 @@ local shell = require("shell")
 	end
 end]]
 
-local local function load_formats()
+local function load_formats()
 	for _, path in ipairs(load_dirs) do
 		if fs.exists(path) then
 			for ent in fs.list(path) do
