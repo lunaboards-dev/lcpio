@@ -25,7 +25,8 @@ function buffered_file:skip(amt)
 	if (#self.buffer >= amt) then
 		self.buffer = self.buffer:sub(amt+1)
 	else
-		if (self.file == io.stdin) then
+		--lcpio.warning(self)
+		if self.can_rw then
 			local ramt = amt-#self.buffer
 			while ramt > 0 do
 				local bite = 4096
@@ -42,12 +43,17 @@ function buffered_file:skip(amt)
 	end
 end
 
+function buffered_file:seek(whence, amt)
+	if not self.can_rw then lcpio.error("i/o error: stream does not support rewinding") end
+	return self.file:seek(whence, amt)
+end
+
 setmetatable(buffered_file, {__index=function(_, k)
 	return function(self, ...)
 		return self[k](self, ...)
 	end
 end})
 
-local function create_bf(file, buffer)
-	return setmetatable({file=file, buffer=buffer, bytes = 0}, {__index=buffered_file})
+local function create_bf(file, buffer, can_rw)
+	return setmetatable({file=file, buffer=buffer, bytes = 0, can_rw = can_rw}, {__index=buffered_file})
 end

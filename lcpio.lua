@@ -16,6 +16,7 @@ loadfile("config.lua", "t", _G)()]]
 
 local formats = {}
 local fmt_list = {"auto"}
+local sshcommand = "/bin/ssh"
 
 local debug_mode = false
 
@@ -130,6 +131,10 @@ load_formats()
 
 args = parser:parse(arg or {...})
 
+if args.rsh_command or args.ssh_command then
+	ssh_command = args.rsh_command or args.ssh_command
+end
+
 table.sort(fmt_list)
 
 if args.list_formats then
@@ -157,15 +162,19 @@ local read_bytes = 0
 local file
 local function open_file()
 	if (args.create) then
-		if args.file and args.file:match("[^:]+:.+") then
-			file = ssh_open(args, "w")
+		if args.file and args.file:match("[^:]+:.+") and LCPIO_ENABLE_SSH then
+			local addr, path = args.file:match("([^:]+):(.+)")
+			file = create_bf(ssh_open(addr, path, "w"), "")
+		else
+			file = create_bf(args.file and fopen_w(args.file) or io.stdout, "", args.file)
 		end
-		file = create_bf(args.file and fopen_w(args.file) or io.stdout, "")
 	elseif args.list or args.extract then
-		if args.file and args.file:match("[^:]+:.+") then
-			file = create_bf(ssh_open(args, "r"), "")
+		if args.file and args.file:match("[^:]+:.+") and LCPIO_ENABLE_SSH then
+			local addr, path = args.file:match("([^:]+):(.+)")
+			file = create_bf(ssh_open(addr, path, "r"), "")
+		else
+			file = args.file and create_bf(fopen_r(args.file), "", true) or create_bf(io.stdin, "")
 		end
-		file = args.file and create_bf(fopen_r(args.file), "") or create_bf(io.stdin, "")
 	end
 end
 
@@ -327,7 +336,7 @@ elseif (args.create) then -- we don't yet support appending, sadly.
 			local h = fopen_r(path)
 			local size = stat.size
 			while size > 0 do
-				local bite = 1024*1024
+				local bite = blk
 				if (size < bite) then
 					bite = size
 				end
@@ -391,7 +400,7 @@ elseif (args.extract) then
 			local ofile = fopen_w(stat.name)
 			local size = stat.size
 			while size > 0 do
-				local bite = 1024*1024
+				local bite = blk
 				if (size < bite) then
 					bite = size
 				end
@@ -421,3 +430,6 @@ else
 	lcpio.error("must specify one of oipt")
 end
 io.stderr:write(math.ceil(file.bytes/blk).." blocks\n")
+if file.file ~= io.stdout and file.file ~= io.stdin then
+	file.file:close()
+end
