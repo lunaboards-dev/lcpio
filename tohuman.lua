@@ -11,3 +11,10 @@ local function to_human(bytes)
 	end
 	return string.format("%.1f %sB", bytes, units[u])
 end
+
+local function pad(s, size)
+	if #s ~= size then
+		s = s .. string.rep(" ", size-#s)
+	end
+	return s
+end

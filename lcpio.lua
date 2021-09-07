@@ -137,6 +137,12 @@ elseif args.append and not args.file then
 	lcpio.error("--append spcified, but there's no file to append to")
 end
 
+if args["6"] then
+	args.format = "cpio64"
+elseif args.c then
+	args.format = "odc"
+end
+
 if args.rsh_command or args.ssh_command then
 	ssh_command = args.rsh_command or args.ssh_command
 end
@@ -360,22 +366,24 @@ elseif args.list then
 				usr = stat.uid and lookup_uid(stat.uid) or "n/a"
 			else
 				grp = string.format("%5d", stat.gid or 0)
-				uid = string.format("%5d", stat.uid or 0)
+				usr = string.format("%5d", stat.uid or 0)
 			end
 			local size
 			if args.human_sizes then
 				size = to_human(stat.size)
 			else
-				size = string.format("%10d", stat.size)
+				size = string.format("%8d", stat.size)
 			end
+			grp = pad(grp, 8)
+			usr = pad(usr, 8)
 			io.stdout:write(string.format(
-				"%s %2d %5s %5s %10s  %11s  %s\n",
+				"%s %3d %7s %7s "..(args.human_sizes and "%10s" or "%8s").." %11s %s\n",
 				get_rwx_string(stat.mode),
 				stat.nlink or 0,
 				grp,
 				usr,
 				size,
-				stat.mtime and os.date("%b %d %Y", stat.mtime//1) or "n/a",
+				stat.mtime and os.date("%b %d %H:%M", stat.mtime//1) or "n/a",
 				stat.name
 			))
 		else
