@@ -131,6 +131,12 @@ load_formats()
 
 args = parser:parse(arg or {...})
 
+if args.append and not args.create then
+	lcpio.error("--append specified, but we're not in copy-out mode")
+elseif args.append and not args.file then
+	lcpio.error("--append spcified, but there's no file to append to")
+end
+
 if args.rsh_command or args.ssh_command then
 	ssh_command = args.rsh_command or args.ssh_command
 end
@@ -161,16 +167,21 @@ end
 local read_bytes = 0
 local file
 local function open_file()
-	if (args.create) then
-		if args.file and args.file:match("[^:]+:.+") and LCPIO_ENABLE_SSH then
-			local addr, path = args.file:match("([^:]+):(.+)")
+	if args.append then
+		if args.file:match("^[^:]:.+$") and LCPIO_ENABLE_SSH then
+			lcpio.error("can't append to remote files")
+		end
+		file = create_bf(args.file and fopen_rw(args.file), "", true)
+	elseif (args.create) then
+		if args.file and args.file:match("^[^:]+:.+$") and LCPIO_ENABLE_SSH then
+			local addr, path = args.file:match("^([^:]+):(.+)$")
 			file = create_bf(ssh_open(addr, path, "w"), "")
 		else
 			file = create_bf(args.file and fopen_w(args.file) or io.stdout, "", args.file)
 		end
 	elseif args.list or args.extract then
-		if args.file and args.file:match("[^:]+:.+") and LCPIO_ENABLE_SSH then
-			local addr, path = args.file:match("([^:]+):(.+)")
+		if args.file and args.file:match("^[^:]+:.+$") and LCPIO_ENABLE_SSH then
+			local addr, path = args.file:match("^([^:]+):(.+)$")
 			file = create_bf(ssh_open(addr, path, "r"), "")
 		else
 			file = args.file and create_bf(fopen_r(args.file), "", true) or create_bf(io.stdin, "")
@@ -235,7 +246,103 @@ local function get_rwx_string(mode)
 	return t..pstring
 end
 
-if (args.list) then
+if args.append then
+	open_file()
+	local format = file_autodetect()
+	if not format then lcpio.error("unknown format "..args.format) end
+	format.args = {}
+	load_args(format.id, format.args)
+	if format.init then format:init() end
+	while true do
+		local pos = file:seek("cur", 0)
+		local stat = format:read(file)
+		if not stat then file:seek("set", pos) break end
+		file:skip(stat.size)
+		if format.align then
+			local skip = format.align - (stat.size % format.align)
+			--lcpio.warning(string.format("skip: %d size: %d align %d", skip, stat.size, format.align))
+			if skip > 0 and skip ~= format.align then
+				--lcpio.warning("skipped "..skip.." bytes")
+				file:skip(skip)
+			end
+		end
+	end
+	local lines = {}
+	if args.null then
+		local buf = ""
+		while true do
+			local c = io.stdin:read(1)
+			if not c or c == "" then
+				table.insert(lines, buf)
+				break
+			elseif c == "\0" then
+				table.insert(lines, buf)
+				buf = ""
+			else
+				buf = buf .. c
+			end
+		end
+	else
+		for line in io.stdin:lines() do
+			table.insert(lines, line)
+		end
+	end
+	for i=1, #lines do
+		local path = lines[i]
+		-- actually create the archive
+		if (args.verbose) then
+			io.stderr:write(path,"\n")
+		elseif (args.dot) then
+			io.stderr:write(".")
+		end
+		local stat = get_stat(path)
+		stat.name = path
+		stat.name = stat.name:gsub("^/", "")
+		if not LCPIO_ENABLE_METADATA or args.renumber_inodes then
+			stat.dev = 0
+			stat.inode = inode_i
+			stat.ino = inode_i
+			inode_i = inode_i + 1
+		end
+		format:write(file, stat)
+		local size_override
+		if (stat.mode & 0xF000 == 0x8000) then
+			local h = fopen_r(path)
+			local size = stat.size
+			while size > 0 do
+				local bite = blk
+				if (size < bite) then
+					bite = size
+				end
+				local data = h:read(bite)
+				lcpio.debug("writing "..bite.." bytes")
+				if (#data ~= bite) then
+					--os.remove(stat.name)
+					lcpio.error(string.format("i/o error (%d ~= %d)", #data, bite))
+				end
+				file:write(data)
+				size = size - bite
+			end
+			h:close()
+		elseif (stat.mode & 0xF000 == 0xA000) then
+			local lpath = readlink(path)
+			file:write(lpath)
+		elseif (stat.mode & 0xF000 == 0x2000 or stat.mode & 0xF000 == 0x6000) and format.write_special then
+			size_override = format:write_special(file, stat)
+		end
+		if format.align then
+			local size = size_override or stat.size
+			local skip = format.align - (size % format.align)
+			--lcpio.warning(string.format("skip: %d size: %d align %d", skip, stat.size, format.align))
+			if skip > 0 and skip ~= format.align then
+				--lcpio.warning("skipped "..skip.." bytes")
+				--file:skip(skip)
+				file:write(string.rep("\0", skip))
+			end
+		end
+	end
+	format:write_leadout(file)
+elseif args.list then
 	open_file()
 	local format = file_autodetect()
 	if not format then lcpio.error("unknown format "..args.format) end

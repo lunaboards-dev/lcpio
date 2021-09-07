@@ -159,6 +159,10 @@ local function fopen_r(path)
 	return io.open(path, "rb")
 end
 
+local function fopen_rw(path)
+	return io.open(path, "r+b")
+end
+
 local function chdir(path)
 	shell.setWorkingDirectory(path)
 end

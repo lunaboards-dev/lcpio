@@ -155,6 +155,14 @@ local function fopen_w(path)
 	return stdio.fdopen(fd, "w")
 end
 
+local function fopen_rw(path)
+	local fd, err, code = fcntl.open(path, fcntl.O_RDWR)
+	if not fd then
+		lcpio.error(err, code)
+	end
+	return stdio.fdopen(fd, "r+")
+end
+
 local function fopen_r(path)
 	local fd, err, code = fcntl.open(path, fcntl.O_RDONLY)
 	if not fd then
