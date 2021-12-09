@@ -138,7 +138,7 @@ end
 
 local known_tags = {
 	["time"] = function(hdr)
-		return make_tag("tIME", string.pack("llll", hdr.mtime, hdr.atime, hdr.ctime, hdr.otime))
+		return make_tag("tIME", string.pack("llll", hdr.mtime, hdr.atime, 0, 0))
 	end,
 	["owner"] = function(hdr)
 		return make_tag("oWNr", string.pack("II", hdr.uid, hdr.gid))
