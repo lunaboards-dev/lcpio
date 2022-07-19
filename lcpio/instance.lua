@@ -5,6 +5,7 @@ local instance = {}
 local inst = {}
 
 function instance.copy_out(stream, args)
+    if args.format.init then args.format:init() end
     return setmetatable({
         format = args.format,
         noxd = args.noxd or args.format.noxd,
@@ -16,6 +17,7 @@ function instance.copy_out(stream, args)
 end
 
 function instance.copy_in(stream, args)
+    if args.format.init then args.format:init() end
     return setmetatable({
         format = args.format,
         noxd = args.noxd or args.format.noxd,
