@@ -54,54 +54,56 @@ end
 local blk = 512
 
 parser:group("Operations valid in any mode",
-	parser:flag("-6", "Use the new cpio64 archive format"),
-	parser:option("--block-size", "Set the I/O block size to BLOCK-SIZE * 512 bytes."),
-	parser:flag("-B", "Set the I/O block size to 5120 bytes."),
-	parser:flag("-c", "Use the old portable (ASCII) archive format."),
-	parser:option("-C --io-size", "Set the I/O block size to the given number of bytes."),
-	parser:option("-D --directory", "Change directory to DIR"),
-	parser:flag("--force-local", "Archive file is local, even if it's name contains colons."),
-	format_option,
-	parser:flag("-v --verbose", "Verbosely list the files processed"),
-	parser:flag("-V --dot", "Print a \".\" for each file processed"),
-	parser:option("-W --warning", "Control warning display. Currently, FLAG is one of 'none', 'truncate', 'all'. Multiple options accumulate."):count("*"),
-	parser:flag("-g --debug", "Debug prints (prints as warning)")
+	parser:flag("-6", "Use the new cpio64 archive format"), -- check
+	parser:option("--block-size", "Set the I/O block size to BLOCK-SIZE * 512 bytes."), -- check
+	parser:flag("-B", "Set the I/O block size to 5120 bytes."), -- check
+	parser:flag("-c", "Use the old portable (ASCII) archive format."), -- check
+	parser:option("-C --io-size", "Set the I/O block size to the given number of bytes."), --check
+	parser:option("-D --directory", "Change directory to DIR"), -- check
+	@[[if svar.get("LCPIO_ENABLE_SSH") then]]
+	parser:flag("--force-local", "Archive file is local, even if it's name contains colons."), --TODO
+	@[[end]]
+	format_option, -- check
+	parser:flag("-v --verbose", "Verbosely list the files processed"), -- check
+	parser:flag("-V --dot", "Print a \".\" for each file processed"), -- check
+	parser:option("-W --warning", "Control warning display. Currently, FLAG is one of 'none', 'truncate', 'all'. Multiple options accumulate."):count("*"), -- TODO
+	parser:flag("-g --debug", "Debug prints (prints as warning)") -- check
 )
 
 parser:group("Operation modifiers valid in copy-in and copy-out modes",
 	@[[if svar.get("LCPIO_ENABLE_SSH") then]]
-	parser:option("--ssh-command --rsh-command", "Use COMMAND instead of ssh"),
+	parser:option("--ssh-command --rsh-command", "Use COMMAND instead of ssh"), -- check
 	@[[end]]
-	parser:option("-F --file", "Use this file name instead of standard input or output.@[[if svar.get("LCPIO_ENABLE_SSH") then]] Optional user and host specify the user and host names in case of a remote archive.@[[end]]"),
-	parser:option("-M --message", "Print a message when the end of a volume of the backup media is reached.")
+	parser:option("-F --file", "Use this file name instead of standard input or output.@[[if svar.get("LCPIO_ENABLE_SSH") then]] Optional user and host specify the user and host names in case of a remote archive.@[[end]]"), -- check
+	parser:option("-M --message", "Print a message when the end of a volume of the backup media is reached.") -- TODO
 )
 
 parser:group("Operation modifiers valid only in copy-in mode",
-	parser:flag("-f --nonmatching", "Only copy files that do not match any of the given patterns."),
-	parser:flag("-n --numeric-uid-gid", "In the verbose table of contents listing, show numeric UID and GID."),
-	parser:flag("-S --human-sizes", "In the verbose table of contents listing, show sizes in a human-readable form."),
-	parser:flag("-r --rename", "Interactively rename files."),
-	parser:flag("--to-stdout", "Extract files to stdout."),
-	parser:option("-E --patern-file", "Read additional patterns specifying filenames to extract or list from FILE"),
-	parser:flag("--only-verify-crc", "When reading an archive with a checksum, only verify the checksums of each file in the archive, don't actually extract the files.")
+	parser:flag("-f --nonmatching", "Only copy files that do not match any of the given patterns."), -- TODO
+	parser:flag("-n --numeric-uid-gid", "In the verbose table of contents listing, show numeric UID and GID."), -- check
+	parser:flag("-S --human-sizes", "In the verbose table of contents listing, show sizes in a human-readable form."), -- check
+	parser:flag("-r --rename", "Interactively rename files."), -- TODO
+	parser:flag("--to-stdout", "Extract files to stdout."), -- TODO
+	parser:option("-E --patern-file", "Read additional patterns specifying filenames to extract or list from FILE"), -- TODO
+	parser:flag("--only-verify-crc", "When reading an archive with a checksum, only verify the checksums of each file in the archive, don't actually extract the files.") -- TODO
 )
 
 parser:group("Operation modifiers valid only in copy-out mode",
-	parser:flag("-A --append", "Append to an existing archive.")@[[if svar.get("LCPIO_ENABLE_METADATA") then]],
-	parser:flag("--device-independent --reproducible", "Create device independent (reproducible) archives."),
-	parser:flag("--ignore-devno", "Don't store device numbers."),
-	parser:flag("--renumber-inodes", "Renumber inodes.")@[[end]]
+	parser:flag("-A --append", "Append to an existing archive.")@[[if svar.get("LCPIO_ENABLE_METADATA") then]], -- check
+	parser:flag("--device-independent --reproducible", "Create device independent (reproducible) archives."), -- check
+	parser:flag("--ignore-devno", "Don't store device numbers."), -- check
+	parser:flag("--renumber-inodes", "Renumber inodes.")@[[end]] -- check
 )
 
 parser:group("Operation modifiers valid only in copy-pass mode",
-	parser:flag("-l --link", "Link files instead of copying them, when possible.")
+	parser:flag("-l --link", "Link files instead of copying them, when possible.") -- todo
 )
 
 do
 	-- fuck
-	local a, b, c = parser:flag("--absolute-file-names", "Do not strip file system prefix components from the file names."),
-	parser:flag("--no-absolute-filenames", "Create all files relative to the current directory."),
-	parser:flag("--strip-leading-slash", "Strips leading slashes from file names.")
+	local a, b, c = parser:flag("--absolute-file-names", "Do not strip file system prefix components from the file names."), -- todo
+	parser:flag("--no-absolute-filenames", "Create all files relative to the current directory."), -- todo
+	parser:flag("--strip-leading-slash", "Strips leading slashes from file names.") -- todo
 	parser:group("Operation modifiers in copy-in and copy-out modes",
 		a, b, c
 	)
@@ -110,21 +112,21 @@ end
 
 
 parser:group("Operation modifiers valid in copy-out and copy-pass modes",
-	parser:flag("-0 --null", "Filenames in the list are delimited by null characters instead of newlines."),
+	parser:flag("-0 --null", "Filenames in the list are delimited by null characters instead of newlines."), -- done
 	@[[if svar.get("LCPIO_ENABLE_METADATA") then]]
-	parser:flag("-a --reset-access-time", "Resets the access times of files after reading them."),
+	parser:flag("-a --reset-access-time", "Resets the access times of files after reading them."), -- todo
 	@[[end]]
-	parser:flag("-L --dereference", "Dereference symbolic links (copy the files that they point to instead of copying the links)")
+	parser:flag("-L --dereference", "Dereference symbolic links (copy the files that they point to instead of copying the links)") -- todo
 )
 
 parser:group("Operation modifiers valid in copy-in and copy-pass modes",
-	parser:flag("-d --make-directories", "Create leading directories where needed."),
+	parser:flag("-d --make-directories", "Create leading directories where needed."), -- todo
 	@[[if svar.get("LCPIO_ENABLE_METADATA") then]]
-	parser:flag("-m --preserve-modification-time", "Retain previous file modification times when creating files."),
-	parser:flag("--no-preserve-owner", "Do not change the ownership of the files."),
+	parser:flag("-m --preserve-modification-time", "Retain previous file modification times when creating files."), -- todo
+	parser:flag("--no-preserve-owner", "Do not change the ownership of the files."), -- todo
 	@[[end]]
-	parser:flag("--sparse", "Write files with large blocks of zeroes as sparse files."),
-	parser:flag("-u --unconditional", "Replace all files unconditionally.")
+	parser:flag("--sparse", "Write files with large blocks of zeroes as sparse files."), -- todo
+	parser:flag("-u --unconditional", "Replace all files unconditionally.") -- todo
 )
 
 load_formats()
@@ -250,6 +252,10 @@ local function get_rwx_string(mode)
 		end
 	end
 	return t..pstring
+end
+
+local function next_entry()
+
 end
 
 if args.append then

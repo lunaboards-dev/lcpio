@@ -1,0 +1,9 @@
+{
+    "Lua.workspace.ignoreDir": [
+        ".vscode",
+        "old"
+    ],
+    "Lua.diagnostics.globals": [
+        "lcpio"
+    ]
+}

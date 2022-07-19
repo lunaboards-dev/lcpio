@@ -8,6 +8,7 @@ function buffered_file:read(amt)
 	else
 		local ret = self.buffer
 		self.buffer = ""
+		--lcpio.warning(amt-#ret)
 		local fret, err = self.file:read(amt-#ret)
 		--self.bytes = self.bytes + amt-#ret
 		if not fret then lcpio.error("unexpected eof") end
@@ -46,6 +47,16 @@ end
 function buffered_file:seek(whence, amt)
 	if not self.can_rw then lcpio.error("i/o error: stream does not support rewinding") end
 	return self.file:seek(whence, amt)
+end
+
+function buffered_file:tell()
+	return self.bytes
+end
+
+function buffered_file:close()
+	if self.file ~= io.stdin and self.file ~= io.stdout and self.file ~= io.stderr then
+		self.file:close()
+	end
 end
 
 setmetatable(buffered_file, {__index=function(_, k)

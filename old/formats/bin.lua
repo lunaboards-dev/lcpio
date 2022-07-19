@@ -46,7 +46,8 @@ function FORMAT:write(file, stat)
 	end
 	local fz_hi, fz_lo = stat.size >> 16, stat.size & 0xFFFF
 	local mt_hi, mt_lo = stat.mtime >> 16, stat.mtime & 0xFFFF
-	file:write(packstr:pack(magic, stat.dev, stat.ino, stat.mode, stat.uid, stat.gid, stat.nlink, stat.rdev, mt_hi, mt_lo, #stat.name + 1, fz_hi, fz_lo))
+	-- lmao stat.ino can overflow, probably not a good thing
+	file:write(packstr:pack(magic, stat.dev, stat.ino & 0xFFFF, stat.mode, stat.uid, stat.gid, stat.nlink, stat.rdev, mt_hi, mt_lo, #stat.name + 1, fz_hi, fz_lo))
 	file:write(stat.name.."\0")
 	if (#stat.name+1) & 1 > 0 then
 		file:write("\0")

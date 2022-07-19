@@ -1,3 +1,5 @@
+-- Luaposix support
+
 local dirent = require("posix.dirent")
 local stat = require("posix.sys.stat")
 local unistd = require("posix.unistd")
@@ -6,6 +8,41 @@ local fcntl = require("posix.fcntl")
 local stdio = require("posix.stdio")
 local pwd = require("posix.pwd")
 local grp = require("posix.grp")
+
+platform.add_load_directories("./formats", "/usr/share/lcpio/formats")
+
+function platform.list_dir(path)
+	local e = dirent.dir(path)
+	table.sort(e)
+	return e
+end
+
+function platform.stat(path)
+	local st, e = stat.lstat(path)
+	if not st then return nil, e end
+	local s = {
+		dev = st.st_dev,
+		ino = st.st_ino,
+		inode = st.st_ino,
+		nlink = st.st_nlink,
+		mode = st.st_mode,
+		uid = st.st_uid,
+		gid = st.st_gid,
+		rdev = st.st_rdev,
+		size = st.st_size,
+		atime = st.st_atime,
+		mtime = st.st_mtime,
+		ctime = st.st_ctime,
+		blksize = st.st_blksize,
+		blocks = st.st_blocks,
+		name = path
+	}
+	local t = s.mode & 0xF000
+	if t ~= 0x8000 and t ~= 0xA000 then
+		s.size = 0
+	end
+	return s
+end
 
 local function load_formats()
 	for _, path in ipairs(load_dirs) do
@@ -89,7 +126,8 @@ local function get_stat(path)
 		mtime = st.st_mtime,
 		ctime = st.st_ctime,
 		blksize = st.st_blksize,
-		blocks = st.st_blocks
+		blocks = st.st_blocks,
+		name = path
 	}
 	local t = s.mode & 0xF000
 	if t ~= 0x8000 and t ~= 0xA000 then
@@ -98,8 +136,8 @@ local function get_stat(path)
 	return s
 end
 
-local function openfile(path)
-	return io.open(path, "w")
+function platform.openfile(path, mode)
+	return io.open(path, mode or "r")
 end
 
 local function setperms(path, st)

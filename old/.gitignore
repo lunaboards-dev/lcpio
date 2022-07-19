@@ -1,4 +1,5 @@
 test/**
+lcpio
 *.cpio
 *.cpio64
 *.txc
@@ -6,4 +7,3 @@ test/**
 *.tsar
 test.*
 build/**
-!test.lua

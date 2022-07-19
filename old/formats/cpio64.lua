@@ -29,8 +29,10 @@ function FORMAT:read(file)
 	end
 	local ent = {}
 	ent.magic, ent.dev, ent.mode, ent.nlink, ent.rdev, ent.namesize, ent.ino, ent.uid, ent.gid, ent.filesize, ent.atime, ent.ctime, ent.otime, ent.mtime = string.unpack(e..packstr, mgk_raw..file:read(packstr:packsize()-2))
-	ent.name = file:read(ent.namesize-1)
-	file:skip(1)
+	ent.name = file:read(ent.namesize)
+	if ent.name:sub(ent.namesize, ent.namesize) == "\0" then
+		ent.name = ent.name:sub(1, ent.namesize - 1)
+	end
 	if (ent.namesize & 1 > 0) then
 		--lcpio.warning("skip")
 		file:skip(1)
@@ -57,21 +59,21 @@ function FORMAT:read(file)
 end
 
 function FORMAT:write(file, stat)
-	file:write(packstr:pack(ent.magic, stat.dev, stat.mode, stat.nlink, stat.rdev, #stat.name, stat.inode, stat.uid, stat.gid, stat.size, stat.atime, stat.ctime, stat.otime or stat.mtime, stat.mtime))
-	file:write(stat.name)
-	if (stat.name & 1 > 0) then
+	file:write(packstr:pack(mag, stat.dev, stat.mode, stat.nlink, stat.rdev, #stat.name+1, stat.inode, stat.uid, stat.gid, stat.size, stat.atime, stat.ctime, stat.otime or stat.mtime, stat.mtime))
+	file:write(stat.name.."\0")
+	if ((#stat.name+1) & 1 > 0) then
 		file:write("\0")
 	end
 end
 
 function FORMAT:write_leadout(file)
-	file:write(packstr:pack(
-		ent.magic,
+	--[[file:write(packstr:pack(
+		mag,
 		0,
 		0,
 		0,
 		0,
-		10,
+		11,
 		0,
 		0,
 		0,
@@ -80,5 +82,20 @@ function FORMAT:write_leadout(file)
 		0,
 		0,
 		0
-	).."TRAILER!!!")
+	).."TRAILER!!!\0\0")]]
+	self:write(file, {
+		dev = 0,
+		mode = 0,
+		nlink = 0,
+		rdev = 0,
+		name = "TRAILER!!!",
+		inode = 0,
+		uid = 0,
+		gid = 0,
+		size = 0,
+		atime = 0,
+		ctime = 0,
+		otime = 0,
+		mtime = 0
+	})
 end
