@@ -15,17 +15,18 @@ This utility aims to be a lua reimplementation of the cpio utility, with new fea
     * [ ] Strip leading slashes
     * [ ] Keep leading slashes
     * [ ] Block size
-* [ ] Extensions
+* [x] Extensions
     * [x] Extended metadata
-    * [ ] Extended file data
-    * [ ] Tagging
+    * [x] Extended file data
+    * [x] Tagging
 * [ ] Formats
     * [x] binary cpio (`-Hbin`)
-    * [ ] old ascii format (`-Hodc`)
-    * [ ] new ascii format (`-Hnewc`) 
+    * [x] old ascii format (`-Hodc`)
+    * [x] new ascii format (`-Hnewc`) 
     * [ ] CRC ascii format (`-Hcrc`)
     * [ ] TAR (`-Htar`)
     * [ ] USTAR (`-Hustar`)
 * [ ] Backends
-    * [ ] LuaFileSystem
-    * [ ] luaposix
+    * [x] LuaFileSystem
+    * [x] luaposix
+    * [ ] OpenComputers
