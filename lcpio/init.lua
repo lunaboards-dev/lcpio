@@ -1,7 +1,7 @@
 local cpio_io = require "lcpio.cpio_io"
 lcpio = {}
 lcpio.version = "2.0.0-alpha0"
-lcpio.debug = os.getenv("LCPIO_DBG") == "y"
+lcpio.enable_debug = os.getenv("LCPIO_DBG") == "y"
 --#region Core setup
 function lcpio.error(err, ...)
     local loc = debug.getinfo(2, "S").source:match("([^/]+).lua$")
@@ -25,8 +25,8 @@ function lcpio.warn_once(warn, ...)
 end
 
 function lcpio.debug(warn, ...)
-    --if not lcpio.debug then return end
-    if true then return end
+    if not lcpio.enable_debug then return end
+    --if true then return end
     local loc = debug.getinfo(2, "S").source:match("([^/]+).lua$")
     io.stderr:write(string.format("\27[90m(\27[37m%s\27[90m) "..warn.."\27[0m\n", loc, ...))
 end
@@ -94,7 +94,7 @@ local backends = {
     "posix", -- Uses luaposix.
     --"win32", -- Soon, maybe
     "lfs", -- Also soon, maybe
-    --"openos" -- Soon, for sure.
+    "openos" -- Soon, for sure.
 }
 local backend do
     for i=1, #backends do
@@ -148,9 +148,14 @@ end
 
 format_option:choices(fl)
 
-local args = parser:parse()
+local args
+if arg then
+    args = parser:parse()
+else
+    args = parser:parse(...)
+end
 local instance = require("lcpio.instance")
-lcpio.debug = lcpio.debug or args.debug
+lcpio.enable_debug = lcpio.enable_debug or args.debug
 
 local warnings = {}
 
@@ -164,7 +169,7 @@ local infile, outfile
 if args.create then
     outfile = cpio_io.open_write(args)
     infile = io.stdin
-elseif arg.extract or args.list then
+elseif args.extract or args.list then
     outfile = io.stdout
     infile = cpio_io.open_read(args)
 end
@@ -357,7 +362,8 @@ elseif (args.create) then
             end
             inst.total_shards = inst.total_shards+shard_count
         elseif st.mode & 0xF000 == 0xA000 then
-            instance:write_data(st.target.."\0")
+            inst:write_data(st.target.."\0")
+            cpio_io.align(inst)
         end
     end
     inst:leadout()

@@ -56,7 +56,7 @@ function backend.stat(path)
 	lcpio.warn_once("statx library not installed! limited to 32-bit times (beware Y2038!)")
 	local sb = stat.lstat(path)
 	local linkname
-	if sb.stx_mode & 0xF000 == 0xA000 then
+	if sb.st_mode & 0xF000 == 0xA000 then
 		linkname = unistd.readlink(path)
 	end
 	local dma, dmi = lcpio.dev(sb.st_dev)
@@ -76,7 +76,8 @@ function backend.stat(path)
 		atime = sb.st_atime,
 		mtime = sb.st_mtime,
 		ctime = sb.st_ctime,
-		target = linkname
+		target = linkname,
+		nlink = sb.st_nlink
 	}
 end
 

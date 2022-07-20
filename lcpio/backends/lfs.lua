@@ -1,7 +1,13 @@
 -- LFS fallback backend. Guess I should really just use this for now.
-local path_sep = package.config:sub(1,1)
 
-local lfs = lcpio.prequire("lfs")
+local path_sep
+if package.config then
+    path_sep = package.config:sub(1,1)
+else
+    path_sep = "/"
+end
+
+local lfs = lcpio.prequire("lfs", lcpio.prequire("computer", true))
 
 local backend = {}
 

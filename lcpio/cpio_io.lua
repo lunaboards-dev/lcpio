@@ -145,7 +145,7 @@ local function xdgen(stat, mask, widths)
     local overflow
     --lcpio.debug("========")
     for k, v in pairs(widths) do
-        --lcpio.debug("field: %s; stat[k]: %q; mask[k]: %q", k, stat[k], mask[k])
+        lcpio.debug("field: %s; stat[k]: %q; mask[k]: %q", k, stat[k], mask[k])
         --if k ~= "size" then
         if true then
             truncated[k] = (stat[k] & mask[k])
