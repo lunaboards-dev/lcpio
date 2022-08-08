@@ -88,7 +88,7 @@ end
 function backend.name_lookup(stat)
 	local user = pwd.getpwuid(stat.uid)
 	local group = grp.getgrgid(stat.gid)
-    return user and user.pw_name or "unknown", group and group.gr_name or "unknown"
+	return user and user.pw_name or "unknown", group and group.gr_name or "unknown"
 end
 
 function backend.dir(path)

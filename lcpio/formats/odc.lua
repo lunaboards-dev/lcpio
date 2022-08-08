@@ -4,14 +4,14 @@ fmt.align = 1
 fmt.long_name = "octal ascii cpio"
 
 fmt.widths = {
-    dev = 18,
-    ino = 18,
-    mode = 18,
-    uid = 18,
-    gid = 18,
-    nlink = 18,
-    mtime = 33,
-    size = 33
+	dev = 18,
+	ino = 18,
+	mode = 18,
+	uid = 18,
+	gid = 18,
+	nlink = 18,
+	mtime = 33,
+	size = 33
 }
 
 local magic = "070707"

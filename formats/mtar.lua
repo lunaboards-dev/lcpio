@@ -4,7 +4,7 @@ fmt.noxd = true
 fmt.long_name = "minitel tar"
 
 fmt.widths = {
-    size = 16
+	size = 16
 }
 
 FORMAT.options = {

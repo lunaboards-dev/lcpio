@@ -2,18 +2,18 @@ local fmt = {}
 fmt.magicsize = 6
 fmt.align = 4
 fmt.widths = {
-    ino = 32,
-    mode = 32,
-    uid = 32,
-    gid = 32,
-    nlink = 32,
-    mtime = 32,
-    filesize = 32,
-    dev_maj = 32,
-    dev_min = 32,
-    rdev_maj = 32,
-    rdev_min = 32,
-    size = 32
+	ino = 32,
+	mode = 32,
+	uid = 32,
+	gid = 32,
+	nlink = 32,
+	mtime = 32,
+	filesize = 32,
+	dev_maj = 32,
+	dev_min = 32,
+	rdev_maj = 32,
+	rdev_min = 32,
+	size = 32
 }
 fmt.long_name = "hex ascii cpio"
 local packstr = -- here we go...
@@ -70,12 +70,12 @@ function fmt:read(file)
 		size = ent.filesize,
 		name = ent.name,
 		mode = ent.mode,
-        dev_maj = ent.dev_maj,
-        dev_min = ent.dev_minor,
-        rdev_maj = ent.rdev_major,
-        rdev_min = ent.rdev_minor,
-        dev = lcpio.mkdev(ent.dev_maj, ent.dev_minor),
-        rdev = lcpio.mkdev(ent.rdev_major, ent.rdev_minor)
+		dev_maj = ent.dev_maj,
+		dev_min = ent.dev_minor,
+		rdev_maj = ent.rdev_major,
+		rdev_min = ent.rdev_minor,
+		dev = lcpio.mkdev(ent.dev_maj, ent.dev_minor),
+		rdev = lcpio.mkdev(ent.rdev_major, ent.rdev_minor)
 	}
 end
 

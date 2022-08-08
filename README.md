@@ -6,27 +6,27 @@ This utility aims to be a lua reimplementation of the cpio utility, with new fea
 
 ## TODO
 * [ ] I/O
-    * [x] Basic write support
-    * [ ] Basic read support
-    * [ ] Tape I/O support
-    * [ ] SSH I/O support
-    * [ ] Compressed I/O support
+	* [x] Basic write support
+	* [ ] Basic read support
+	* [ ] Tape I/O support
+	* [ ] SSH I/O support
+	* [ ] Compressed I/O support
 * [ ] Options
-    * [ ] Strip leading slashes
-    * [ ] Keep leading slashes
-    * [ ] Block size
+	* [ ] Strip leading slashes
+	* [ ] Keep leading slashes
+	* [ ] Block size
 * [x] Extensions
-    * [x] Extended metadata
-    * [x] Extended file data
-    * [x] Tagging
+	* [x] Extended metadata
+	* [x] Extended file data
+	* [x] Tagging
 * [ ] Formats
-    * [x] binary cpio (`-Hbin`)
-    * [x] old ascii format (`-Hodc`)
-    * [x] new ascii format (`-Hnewc`) 
-    * [ ] CRC ascii format (`-Hcrc`)
-    * [ ] TAR (`-Htar`)
-    * [ ] USTAR (`-Hustar`)
+	* [x] binary cpio (`-Hbin`)
+	* [x] old ascii format (`-Hodc`)
+	* [x] new ascii format (`-Hnewc`) 
+	* [ ] CRC ascii format (`-Hcrc`)
+	* [ ] TAR (`-Htar`)
+	* [ ] USTAR (`-Hustar`)
 * [ ] Backends
-    * [x] LuaFileSystem
-    * [x] luaposix
-    * [ ] OpenComputers
+	* [x] LuaFileSystem
+	* [x] luaposix
+	* [ ] OpenComputers
